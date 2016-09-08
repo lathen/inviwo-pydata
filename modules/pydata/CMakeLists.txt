@@ -2,6 +2,7 @@ add_subdirectory(ext/pybind11)
 pybind11_add_module(inviwo_pydata pydata.cpp)
 # .PYD file extension on Windows
 set_target_properties(inviwo_pydata PROPERTIES SUFFIX ".pyd")
+target_link_libraries(inviwo_pydata PRIVATE inviwo-module-pydata)
 
 #--------------------------------------------------------------------
 # Inviwo PyData Module
