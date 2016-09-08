@@ -47,8 +47,8 @@ void set_image(std::string processorIdentifier, py::buffer b) {
     imageSource->setData(image);
 }
 
-PYBIND11_PLUGIN(inviwo_pydatad) {
-    py::module m("inviwo_pydatad");
+PYBIND11_PLUGIN(inviwo_pydata) {
+    py::module m("inviwo_pydata");
 
     m.def("set_image", &set_image);
 

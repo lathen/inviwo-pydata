@@ -1,8 +1,22 @@
+#--------------------------------------------------------------------
+# Add pybind11
 add_subdirectory(ext/pybind11)
+
+# Add pydata module and set properties
 pybind11_add_module(inviwo_pydata pydata.cpp)
-# .PYD file extension on Windows
-set_target_properties(inviwo_pydata PROPERTIES SUFFIX ".pyd")
+
+set_target_properties(inviwo_pydata PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set_target_properties(inviwo_pydata PROPERTIES PREFIX "")
+set_target_properties(inviwo_pydata PROPERTIES DEBUG_POSTFIX "")
 target_link_libraries(inviwo_pydata PRIVATE inviwo-module-pydata)
+
+if (WIN32)
+    # .PYD file extension on Windows
+    set_target_properties(inviwo_pydata PROPERTIES SUFFIX ".pyd")
+elseif(UNIX)
+    # .SO file extension on Linux/Mac OS
+    set_target_properties(inviwo_pydata PROPERTIES SUFFIX ".so")
+endif()
 
 #--------------------------------------------------------------------
 # Inviwo PyData Module
