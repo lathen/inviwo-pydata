@@ -27,49 +27,36 @@
  *
  *********************************************************************************/
 
-#include <modules/pydata/pydatamodule.h>
-#include <modules/pydata/processors/imagesourcebuffer.h>
 #include <modules/pydata/processors/volumesourcebuffer.h>
 
 namespace inviwo {
 
-PyDataModule::PyDataModule(InviwoApplication* app) : InviwoModule(app, "PyData") {   
-    // Add a directory to the search path of the Shadermanager
-    // ShaderManager::getPtr()->addShaderSearchPath(getPath(ModulePath::GLSL));
+// The Class Identifier has to be globally unique. Use a reverse DNS naming scheme
+const ProcessorInfo VolumeSourceBuffer::processorInfo_{
+    "se.lathen.VolumeSourceBuffer",      // Class identifier
+    "Volume Source Buffer",              // Display name
+    "Data Input",                       // Category
+    CodeState::Experimental,            // Code state
+    Tags::CPU,                          // Tags
+};
+const ProcessorInfo VolumeSourceBuffer::getProcessorInfo() const {
+    return processorInfo_;
+}
 
-    // Register objects that can be shared with the rest of inviwo here:
+VolumeSourceBuffer::VolumeSourceBuffer()
+    : Processor()
+    , outport_("outport")
+{
+    addPort(outport_);
+}
     
-    // Processors
-    registerProcessor<ImageSourceBuffer>();
-    registerProcessor<VolumeSourceBuffer>();
-    
-    // Properties
-    // registerProperty<PyDataProperty>();
-    
-    // Readers and writes
-    // registerDataReader(util::make_unique<PyDataReader>());
-    // registerDataWriter(util::make_unique<PyDataWriter>());
-    
-    // Data converters
-    // registerRepresentationConverter(util::make_unique<PyDataDisk2RAMConverter>());
+void VolumeSourceBuffer::process() {
+}
 
-    // Ports
-    // registerPort<PyDataOutport>("PyDataOutport");
-    // registerPort<PyDataInport>("PyDataInport");
-
-    // PropertyWidgets
-    // registerPropertyWidget<PyDataPropertyWidget, PyDataProperty>("Default");
-    
-    // Dialogs
-    // registerDialog<PyDataDialog>(PyDataOutport);
-    
-    // Other varius things
-    // registerCapabilities(util::make_unique<PyDataCapabilities>());
-    // registerSettings(util::make_unique<PyDataSettings>());
-    // registerMetaData(util::make_unique<PyDataMetaData>());   
-    // registerPortInspector("PyDataOutport", "path/workspace.inv");
-    // registerProcessorWidget(std::string processorClassName, std::unique_ptr<ProcessorWidget> processorWidget);
-    // registerDrawer(util::make_unique_ptr<PyDataDrawer>());  
+void VolumeSourceBuffer::setData(std::shared_ptr<Volume> volume) {
+    outport_.setData(volume);
+    invalidate(InvalidationLevel::InvalidOutput);
 }
 
 } // namespace
+

@@ -26,6 +26,7 @@ ivw_module(PyData)
 # Add header files
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/processors/imagesourcebuffer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/processors/volumesourcebuffer.h
 )
 ivw_group("Header Files" ${HEADER_FILES})
 
@@ -33,6 +34,7 @@ ivw_group("Header Files" ${HEADER_FILES})
 # Add source files
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/processors/imagesourcebuffer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/processors/volumesourcebuffer.cpp
 )
 ivw_group("Source Files" ${SOURCE_FILES})
 
