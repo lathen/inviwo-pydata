@@ -9,6 +9,7 @@
 namespace py = pybind11;
 using namespace inviwo;
 
+// Return a processor from the network in the Inviwo application
 template <typename T>
 T* getProcessor(std::string identifer) {
     auto inviwoApp = InviwoApplication::getPtr();
@@ -27,6 +28,7 @@ T* getProcessor(std::string identifer) {
     return typedProcessor;
 }
 
+// Return the numeric type corresponding to the Python buffer protocol format
 NumericType getNumericType(std::string format) {
     if (format == py::format_descriptor<float>::format() ||
         format == py::format_descriptor<double>::format())
@@ -45,9 +47,28 @@ NumericType getNumericType(std::string format) {
         throw std::runtime_error("Data type not supported");
 }
 
+// Return the strides for a packed data array stored in row-major order
+std::vector<size_t> getStrides(const std::vector<size_t>& shape, size_t itemsize) {
+    std::vector<size_t> strides(shape.size());
+    size_t i = shape.size() - 1;
+    strides[i] = itemsize;
+    while (true) {
+        if (i == 0)
+            break;
+        i--;
+        strides[i] = strides[i + 1] * shape[i + 1];
+    }
+    return strides;
+}
+
 void set_image(std::string processorIdentifier, py::buffer b) {
     py::buffer_info info = b.request();
     auto imageSource = getProcessor<ImageSourceBuffer>(processorIdentifier);
+
+    // Check the strides
+    auto strides = getStrides(info.shape, info.itemsize);
+    if (info.strides != strides)
+        throw std::runtime_error("Data stride not supported (expects a packed row-major stored buffer)");
 
     // Determine the numeric type
     NumericType type = getNumericType(info.format);
@@ -70,6 +91,10 @@ void set_image(std::string processorIdentifier, py::buffer b) {
         throw std::runtime_error("Data format not supported");
 
     // Create the layer RAM representation
+    // Note that the buffer shape is described in matrix notation (rows,columns)
+    // but the layer uses an image notation (width,height) where width = columns and height = rows
+    // The OpenGL coordinate frame (origin in the lower left corner) furthermore renders the
+    // array up-side down, which I'm not yet sure how to handle in a stringent manner
     auto layerRAM = createLayerRAM(size2_t(info.shape[1], info.shape[0]), LayerType::Color, dataFormat);
     if (!layerRAM)
         throw std::runtime_error("Cannot allocate layer buffer");
@@ -85,6 +110,11 @@ void set_image(std::string processorIdentifier, py::buffer b) {
 void set_volume(std::string processorIdentifier, py::buffer b) {
     py::buffer_info info = b.request();
     auto volumeSource = getProcessor<VolumeSourceBuffer>(processorIdentifier);
+
+    // Check the strides
+    auto strides = getStrides(info.shape, info.itemsize);
+    if (info.strides != strides)
+        throw std::runtime_error("Data stride not supported (expects a packed row-major stored buffer)");
 
     // Determine the numeric type
     NumericType type = getNumericType(info.format);
@@ -107,6 +137,10 @@ void set_volume(std::string processorIdentifier, py::buffer b) {
         throw std::runtime_error("Data format not supported");
 
     // Create the volume RAM representation
+    // Note that the buffer shape is described in matrix notation (rows,columns,slices)
+    // but the volume uses an image notation (width,height,slices) where width = columns and height = rows
+    // The OpenGL coordinate frame (origin in the lower left corner) furthermore renders the
+    // array up-side down, which I'm not yet sure how to handle in a stringent manner
     auto volumeRAM = createVolumeRAM(size3_t(info.shape[1], info.shape[0], info.shape[2]), dataFormat);
     if (!volumeRAM)
         throw std::runtime_error("Cannot allocate volume buffer");
